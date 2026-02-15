@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
-#shellcheck disable=SC2086
 
-if [[ $ALLOW_REMOTE_ACCESS == "yes" ]]; then
-	EXTRA_FLAGS="$EXTRA_FLAGS --bind-all"
+set -euo pipefail
+
+allow_remote_access="${ALLOW_REMOTE_ACCESS:-no}"
+extra_flags="${EXTRA_FLAGS:-}"
+
+if [[ "${allow_remote_access,,}" =~ ^(yes|true|1)$ ]]; then
+  extra_flags="${extra_flags} --bind-all"
 fi
 
+extra_flags=(${extra_flags})
+
 exec \
-	/app/start-engine \
-	--client-console \
-	$EXTRA_FLAGS \
-	"$@"
+  /app/start-engine \
+  --client-console \
+  "${extra_flags[@]}" \
+  "$@"

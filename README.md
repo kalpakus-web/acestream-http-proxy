@@ -35,7 +35,7 @@ For MPEG-TS:
 http://127.0.0.1:6878/ace/getstream?id=STREAM_ID
 ```
 
-where `dd1e67078381739d14beca697356ab76d49d1a2d` is the ID of the AceStream channel.
+where `STREAM_ID` is the ID of the AceStream channel (for example `dd1e67078381739d14beca697356ab76d49d1a2d`).
 
 This image can also be deployed to a server, where it can proxy AceStream
 content over HTTP. To able to reach it from remote you need to set ALLOW_REMOTE_ACCESS=yes as environment variable  
@@ -53,6 +53,40 @@ services:
 ```
 
 for an example, see the [docker-compose.yml](./docker-compose.yml) file in this repository.
+
+## Common gaps and what to improve
+
+If you are deploying this for long-running use, these are the most common missing pieces:
+
+- **Container resiliency**: enable restart policies and health checks in Compose.
+- **Safer remote access toggle**: accept `yes/true/1` when parsing `ALLOW_REMOTE_ACCESS`, to avoid accidental local-only binding.
+- **Monitoring/logging**: forward container logs to your monitoring system and track restarts/healthcheck failures.
+- **Security**: expose port `6878` only behind a VPN/reverse proxy, unless you explicitly need open internet access.
+
+
+## Group channels in a playlist
+
+Yes — group support is done at M3U level via the `group-title` attribute in `#EXTINF`.
+
+Example:
+
+```m3u
+#EXTM3U
+#EXTINF:-1 group-title="News",BBC News
+http://127.0.0.1:6878/ace/getstream?id=dd1e67078381739d14beca697356ab76d49d1a2d
+#EXTINF:-1 group-title="Sport",Eurosport
+http://127.0.0.1:6878/ace/getstream?id=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```
+
+To simplify this, use the helper script in this repo:
+
+```console
+python3 scripts/build_playlist.py examples/channels.csv -o playlist.m3u
+```
+
+- Input format: CSV with `name,id,group,logo` columns (see `examples/channels.csv`).
+- By default it uses `http://127.0.0.1:6878/ace/getstream?id=...`.
+- You can switch endpoint to HLS: `--path /ace/manifest.m3u8`.
 
 ## Contributing
 
@@ -81,5 +115,4 @@ The image will now be running, with the following ports exposed:
 
 - **6878**: AceStream engine port. Docs for command line arguments and debugging
 can be found [here][acestream]
-
 
