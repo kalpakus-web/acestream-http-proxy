@@ -3,12 +3,12 @@
 FROM docker.io/library/python:3.10-slim-bookworm@sha256:034724ef64585eeb0e82385e9aabcbeabfe5f7cae2c2dcedb1da95114372b6d7
 
 LABEL \
-    maintainer="Martin Bjeldbak Madsen <me@martinbjeldbak.com>" \
+    maintainer="kalpakus-web <me@kalpakus-web.com>" \
     org.opencontainers.image.title="acestream-http-proxy" \
     org.opencontainers.image.description="Stream AceStream sources without needing to install AceStream player" \
-    org.opencontainers.image.authors="Martin Bjeldbak Madsen <me@martinbjeldbak.com>" \
-    org.opencontainers.image.url="https://github.com/martinbjeldbak/acestream-http-proxy" \
-    org.opencontainers.image.vendor="https://martinbjeldbak.com"
+    org.opencontainers.image.authors="kalpakus-web <me@kalpakus-web.com>" \
+    org.opencontainers.image.url="https://github.com/kalpakus-web/acestream-http-proxy" \
+    org.opencontainers.image.vendor="https://github.com/kalpakus-web"
 
 ENV DEBIAN_FRONTEND="noninteractive" \
     CRYPTOGRAPHY_DONT_BUILD_RUST=1 \
@@ -62,4 +62,3 @@ USER appuser
 ENTRYPOINT ["/usr/bin/catatonit", "--", "/entrypoint.sh"]
 
 EXPOSE 6878/tcp
-
