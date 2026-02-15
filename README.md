@@ -26,13 +26,13 @@ streaming protocol.
 
 For HLS:
 ```console
-http://127.0.0.1:6878/ace/manifest.m3u8?id=dd1e67078381739d14beca697356ab76d49d1a2
+http://127.0.0.1:6878/ace/manifest.m3u8?id=STREAM_ID
 ```
 
 For MPEG-TS:
 
 ```console
-http://127.0.0.1:6878/ace/getstream?id=dd1e67078381739d14beca697356ab76d49d1a2
+http://127.0.0.1:6878/ace/getstream?id=STREAM_ID
 ```
 
 where `dd1e67078381739d14beca697356ab76d49d1a2d` is the ID of the AceStream channel.
