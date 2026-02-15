@@ -1,68 +1,85 @@
-AceStream HTTP Proxy
+# AceStream HTTP Proxy
 
+This Docker image runs the AceStream Engine and exposes its [HTTP
+API](https://docs.acestream.net/en/developers/connect-to-engine/).
 
+As a result, you will be able to watch AceStreams over HLS or MPEG-TS, without
+needing to install the AceStream player or any other dependencies locally.
 
+This is especially useful for Desktop and NAS usage for anyone who wants to
+tune in to AceStream channels, and who don't want to go through the trouble of
+installing AceStream and its dependencies natively.
 
-This Docker image runs the AceStream Engine and exposes its HTTP API.
+Note: ARM-based CPUs are not currently supported, see issues [#5] and [#13].
 
-As a result, you will be able to watch AceStreams over HLS or MPEG-TS, without needing to install the AceStream player or any other dependencies locally.
+## Usage
 
-This is especially useful for Desktop and NAS usage for anyone who wants to tune in to AceStream channels, and who don't want to go through the trouble of installing AceStream and its dependencies natively.
+Ensure you have [Docker](https://www.docker.com) installed and running. You can then pull down and run the container as shown below.
 
-Note: ARM-based CPUs are not currently supported.
-
-Usage
-
-Ensure you have Docker installed and running.
-
-You can pull and run the container:
-
+```console
 docker run -t -p 6878:6878 ghcr.io/kalpakus-web/acestream-http-proxy:latest
+```
 
-Streaming URLs
-HLS
-http://127.0.0.1:6878/ace/manifest.m3u8?id=STREAM_ID
+You are then able to access AceStreams by pointing your favorite media player
+(VLC, IINA, etc.) to either of the below URLs, depending on the desired
+streaming protocol.
 
-MPEG-TS
-http://127.0.0.1:6878/ace/getstream?id=STREAM_ID
+For HLS:
+```console
+http://127.0.0.1:6878/ace/manifest.m3u8?id=dd1e67078381739d14beca697356ab76d49d1a2
+```
 
+For MPEG-TS:
 
-Replace STREAM_ID with the AceStream channel ID.
+```console
+http://127.0.0.1:6878/ace/getstream?id=dd1e67078381739d14beca697356ab76d49d1a2
+```
 
-Remote access
+where `dd1e67078381739d14beca697356ab76d49d1a2d` is the ID of the AceStream channel.
 
-To allow access from outside:
+This image can also be deployed to a server, where it can proxy AceStream
+content over HTTP. To able to reach it from remote you need to set ALLOW_REMOTE_ACCESS=yes as environment variable  
 
-docker run -t -p 6878:6878 -e ALLOW_REMOTE_ACCESS=yes ghcr.io/kalpakus-web/acestream-http-proxy
+You can also run it using docker-compose with
 
-docker-compose
+```yaml
 ---
 services:
   acestream-http-proxy:
-    image: ghcr.io/kalpakus-web/acestream-http-proxy:latest
+    image: ghcr.io/kalpakus-web/acestream-http-proxy
     container_name: acestream-http-proxy
     ports:
       - 6878:6878
+```
 
+for an example, see the [docker-compose.yml](./docker-compose.yml) file in this repository.
 
-Run locally:
+## Contributing
 
+First of all, thanks!
+
+Ensure you have Docker installed with support for docker-compose, as outlined
+above. This image is simply a simplified wrapper around the
+[AceStream][acestream] HTTP API in order to make it more user friendly to get
+running. All options supported by the AceStream Engine are supported in this
+project. Any contributions to support more configuration is greatly
+appreciated!
+
+Dockerfile steps are roughly guided by <https://wiki.acestream.media/Install_Ubuntu>.
+
+For a list of AceStream versions, see here: <https://docs.acestream.net/products/#linux>
+
+For convenience of easy image rebuilding, this repository contains a
+[`docker-compose.yml`](./docker-compose.yml) file. You can then build & run the
+image locally by running the following command:
+
+```console
 docker-compose up --build
+```
 
-Ports
-Port	Description
-6878	AceStream engine HTTP API
-Build locally
-docker build -t acestream-http-proxy .
-docker run -p 6878:6878 acestream-http-proxy
+The image will now be running, with the following ports exposed:
 
-Package location
-
-After successful GitHub Actions run, the Docker image will be available at:
-
-ghcr.io/kalpakus-web/acestream-http-proxy
+- **6878**: AceStream engine port. Docs for command line arguments and debugging
+can be found [here][acestream]
 
 
-You can find it in:
-
-GitHub → Your Repository → Packages
