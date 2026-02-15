@@ -87,4 +87,4 @@ can be found [here][acestream]
 
 [acestream]: https://docs.acestream.net/en/developers/
 [#5]: https://github.com/martinbjeldbak/acestream-http-proxy/issues/5
-[#13]: https://github.com/martinbjeldbak/acestream-http-proxy/issues/13
+[#13]: https://github.com/martinbjeldbak/acestream-http-proxy/issues/13 
