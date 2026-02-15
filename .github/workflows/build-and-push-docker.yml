@@ -1,20 +1,20 @@
----
-name: Build and push Docker image to DockerHub
+name: Build and push Docker image to GitHub Container Registry
 
-on: # yamllint disable-line rule:truthy
+on:
   push:
     tags:
       - 'v*'
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  packages: write
+  contents: read
 
 jobs:
-  push-to-registries:
-    name: Push Docker image to Docker Hub and GitHub Packages
+  push-to-ghcr:
+    name: Build and push Docker image to GHCR
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6.0.2
@@ -25,13 +25,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3.12.0
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3.4.0
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Log in to the Container registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -42,9 +36,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.10.0
         with:
-          images: |
-            ${{ github.repository }}
-            ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -61,9 +53,26 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Update Docker Hub Description
-        uses: peter-evans/dockerhub-description@v5.0.0
+      - name: Generate Docker image report
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.tags }}"
+          REPORT_FILE="docker-image-report.md"
+          echo "# Docker Image Report" > $REPORT_FILE
+          echo "" >> $REPORT_FILE
+          echo "- **Repository:** ${{ github.repository }}" >> $REPORT_FILE
+          echo "- **Image:** $IMAGE" >> $REPORT_FILE
+          echo "- **Tags:** ${{ steps.meta.outputs.tags }}" >> $REPORT_FILE
+          echo "- **Labels:** ${{ steps.meta.outputs.labels }}" >> $REPORT_FILE
+          echo "- **Created by:** ${{ github.actor }}" >> $REPORT_FILE
+          echo "- **Date:** $(date -u +"%Y-%m-%d %H:%M UTC")" >> $REPORT_FILE
+          echo "" >> $REPORT_FILE
+          echo "You can pull the image with:" >> $REPORT_FILE
+          echo "\`\`\`bash" >> $REPORT_FILE
+          echo "docker pull $IMAGE" >> $REPORT_FILE
+          echo "\`\`\`" >> $REPORT_FILE
+
+      - name: Upload Docker image report
+        uses: actions/upload-artifact@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          short-description: ${{ github.event.repository.description }}
+          name: docker-image-report
+          path: docker-image-report.md
